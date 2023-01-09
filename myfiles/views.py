@@ -27,7 +27,6 @@ class ProductApiView(APIView):
             ]
 
         if request.query_params['id'] != '*':
-            print('s')
             id = request.query_params["id"]
             products = product.objects.get(id=id)
             serializer = ProductSerializer(products)
