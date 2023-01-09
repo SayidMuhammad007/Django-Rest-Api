@@ -5,6 +5,7 @@ from .serializers import *
 from rest_framework.throttling import UserRateThrottle
 from myfiles.models import *
 from datetime import datetime
+from django.db import connection
 
 class ProductApiView(APIView):
     serializer_class = ProductSerializer
@@ -12,16 +13,32 @@ class ProductApiView(APIView):
     def get_queryset(self):
         products = product.objects.all()
         return products
+    
+
 
 
     def get(self, request, *args, **kwargs):
-        
-        try:
+        def dictfetchall(cursor):
+            "Return all rows from a cursor as a dict"
+            columns = [col[0] for col in cursor.description]
+            return [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+            ]
+
+        if request.query_params['id'] != '*':
+            print('s')
             id = request.query_params["id"]
-            if id != None:
-                products = product.objects.get(id=id)
-                serializer = ProductSerializer(products)
-        except:
+            products = product.objects.get(id=id)
+            serializer = ProductSerializer(products)
+
+        elif request.query_params['name'] != '*':
+            name = request.query_params['name']
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM myfiles_product WHERE name LIKE '%"+name+"%'")
+            pro = dictfetchall(cursor)
+            serializer = ProductSerializer(pro, many=True)
+        else:
             products = self.get_queryset()
             serializer = ProductSerializer(products, many=True)
 
