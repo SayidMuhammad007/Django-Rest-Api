@@ -82,16 +82,9 @@ class ProductApiView(APIView):
                 date=datetime.now().date(), time=datetime.now().time(), price1=new_price2, product_id=id)
 
             new_data.save()
-
-            status = {
-                'status': 'True'
-            }
-            return Response(status)
+            return Response("True")
         
         else:
-            status = {
-                'status': 'False'
-            }
             return Response("False")
 
 
@@ -253,13 +246,6 @@ class UserApiView(APIView):
 
         # user_data = user.objects.get(name=username)
         if user.objects.filter(name=username, position='Sotuvchi').count() > 0:
-            status = {
-                'status': 'True'
-            }
-            return Response(status)
+            return Response("True")
         else:
-            return Response('Bunday foydalanuvchi mavjud emas!')
-
-        
-
-        
+            return Response('Bunday foydalanuvchi mavjud emas!')        
