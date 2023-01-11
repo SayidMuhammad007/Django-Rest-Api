@@ -25,7 +25,7 @@ class ProductApiView(APIView):
         if request.query_params['id'] != '*':
             id = request.query_params["id"]
             cursor = connection.cursor()
-            cursor.execute("SELECT id, name, price1, price2, amount, date, status, partner, (SELECT COUNT(id) FROM myfiles_sell)as all_pro FROM myfiles_product WHERE id='"+id+"'")
+            cursor.execute("SELECT id, name, price1, price2, amount, date, (SELECT COUNT(id) FROM myfiles_sell)as all_pro FROM myfiles_product WHERE id='"+id+"'")
             pro = dictfetchall(cursor)
             serializer = ProductSerializer(pro)
 
