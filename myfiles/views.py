@@ -10,11 +10,7 @@ from django.db import connection
 class ProductApiView(APIView):
     serializer_class = ProductSerializer
 
-    def get_queryset(self):
-        products = product.objects.all()
-        return products
     
-
 
 
     def get(self, request, *args, **kwargs):
@@ -38,7 +34,9 @@ class ProductApiView(APIView):
             pro = dictfetchall(cursor)
             serializer = ProductSerializer(pro, many=True)
         else:
-            products = self.get_queryset()
+            cursor = connection.cursor()
+            cursor.execute('SELECT * FROM myfiles_product')
+            products = dictfetchall(cursor)
             serializer = ProductSerializer(products, many=True)
 
         return Response(serializer.data)
@@ -262,6 +260,8 @@ class UserApiView(APIView):
 
         # user_data = user.objects.get(name=username)
         if user.objects.filter(name=username, position='Sotuvchi').count() > 0:
-            return Response("True")
+            users_data = user.objects.filter(name=username)
+            serializer = UserSerializer(users_data, many=True)
+            return Response(serializer.data)
         else:
             return Response('Bunday foydalanuvchi mavjud emas!')        
