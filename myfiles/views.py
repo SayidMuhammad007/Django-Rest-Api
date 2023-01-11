@@ -24,18 +24,20 @@ class ProductApiView(APIView):
 
         if request.query_params['id'] != '*':
             id = request.query_params["id"]
-            products = product.objects.get(id=id)
-            serializer = ProductSerializer(products)
+            cursor = connection.cursor()
+            cursor.execute("SELECT id, name, price1, price2, amount, date, status, partner, (SELECT COUNT(id) FROM myfiles_sell)as all_pro FROM myfiles_product WHERE id='"+id+"'")
+            pro = dictfetchall(cursor)
+            serializer = ProductSerializer(pro)
 
         elif request.query_params['name'] != '*':
             name = request.query_params['name']
             cursor = connection.cursor()
-            cursor.execute("SELECT * FROM myfiles_product WHERE name LIKE '%"+name+"%'")
+            cursor.execute("SELECT id, name, price1, price2, amount, date, status, partner, (SELECT COUNT(id) FROM myfiles_sell)as all_pro FROM myfiles_product WHERE name LIKE '%"+name+"%'")
             pro = dictfetchall(cursor)
             serializer = ProductSerializer(pro, many=True)
         else:
             cursor = connection.cursor()
-            cursor.execute('SELECT * FROM myfiles_product')
+            cursor.execute('SELECT id, name, price1, price2, amount, date, status, partner, (SELECT COUNT(id) FROM myfiles_sell)as all_pro FROM myfiles_product LIMIT 30')
             products = dictfetchall(cursor)
             serializer = ProductSerializer(products, many=True)
 
@@ -106,13 +108,19 @@ class ProductApiView(APIView):
 class SellApiView(APIView):
     serializer_class = SellSerializer
 
-    def get_queryset(self):
-        sell_page = sell.objects.all()
-        return sell_page
     
     def get(self, request, *args, **kwargs):
-        sell_data = sell.objects.all()
-        serializer = SellSerializer(sell_data, many=True)
+        def dictfetchall(cursor):
+            "Return all rows from a cursor as a dict"
+            columns = [col[0] for col in cursor.description]
+            return [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()]
+
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM myfiles_sell")
+        pro = dictfetchall(cursor)
+        serializer = SellSerializer(pro, many=True)
 
         return Response(serializer.data)
 
@@ -213,6 +221,7 @@ class SelledApiView(APIView):
             return Response('True')
         
         elif request.query_params['type'] == 'naqd':
+            
             for i in request.data:
                 new_data = sotilganlar.objects.create(name=i['name'], price=i['price'], date=datetime.now().date(),
                 time=datetime.now().time(), plastik=0, naqd=i['price'], nasiya=0, amount=i['amount'],

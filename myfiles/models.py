@@ -11,6 +11,7 @@ class sell(models.Model):
     price1 = models.CharField(max_length=120)
     user = models.IntegerField()
     product_id = models.IntegerField()
+   
 
 class product(models.Model):
     name = models.CharField(max_length=150)
@@ -18,6 +19,7 @@ class product(models.Model):
     price2 = models.CharField(max_length=150)
     amount = models.CharField(max_length=100)
     date = models.DateField()
+    all_pro = models.IntegerField()
 
 class sotilganlar(models.Model):
     name = models.CharField(max_length=150)
