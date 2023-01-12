@@ -27,7 +27,7 @@ class ProductApiView(APIView):
             cursor = connection.cursor()
             cursor.execute("SELECT id, name, price1, price2, amount, date, (SELECT COUNT(id) FROM myfiles_sell)as all_pro FROM myfiles_product WHERE id='"+id+"'")
             pro = dictfetchall(cursor)
-            serializer = ProductSerializer(pro)
+            serializer = ProductSerializer(pro, many=True)
 
         elif request.query_params['name'] != '*':
             name = request.query_params['name']
@@ -129,7 +129,7 @@ class SellApiView(APIView):
         amount1 =request.query_params['amount'].replace(',','.')
         product_id = request.query_params['product_id']
         status = request.query_params['status']
-        pro_object = product.objects.get(id=product_id)
+        pro_object = product.objects.get(id=product_id) 
         
         val = float(amount1)
         amount = float(pro_object.amount.replace(',', '.'))
